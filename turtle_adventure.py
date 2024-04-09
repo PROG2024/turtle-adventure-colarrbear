@@ -308,6 +308,38 @@ class RandomWalkEnemy(Enemy):
         self.canvas.delete(self.__id)
 
 
+class ChasingEnemy(Enemy):
+    """
+    Chasing enemy
+    """
+
+    def __init__(self,
+                 game: "TurtleAdventureGame",
+                 size: int,
+                 color: str,
+                 speed: float = 1):
+        super().__init__(game, size, color)
+        self.__id = None
+        self.speed = speed  # Enemy's speed is 1
+
+    def create(self) -> None:
+        self.__id = self.canvas.create_oval(0, 0, 0, 0, fill="blue")
+
+    def update(self) -> None:
+        player_x, player_y = self.game.player.x, self.game.player.y
+        direction = math.atan2(player_y - self.y, player_x - self.x)
+        self.x += math.cos(direction) * self.speed
+        self.y += math.sin(direction) * self.speed
+        if self.hits_player():
+            self.game.game_over_lose()
+
+    def render(self) -> None:
+        self.canvas.coords(self.__id, self.x - self.size / 2, self.y - self.size / 2, self.x + self.size / 2, self.y + self.size / 2)
+
+    def delete(self) -> None:
+        self.canvas.delete(self.__id)
+
+
 # TODO
 # Complete the EnemyGenerator class by inserting code to generate enemies
 # based on the given game level; call TurtleAdventureGame's add_enemy() method
@@ -347,22 +379,32 @@ class EnemyGenerator:
         """
         Create a new enemy, possibly based on the game level
         """
-        # new_enemy = DemoEnemy(self.__game, 20, "red")
-        # new_enemy.x = 100
-        # new_enemy.y = 100
-        # self.game.add_element(new_enemy)
+        new_enemy = DemoEnemy(self.__game, 20, "red")
+        new_enemy.x = 100
+        new_enemy.y = 100
+        self.game.add_element(new_enemy)
 
-        random_enemy = random.randint(1, 2)
-        if random_enemy == 1:
-            new_enemy = RandomWalkEnemy(self.__game, 50, "pink")
-            new_enemy.x = random.randint(0, 800)
-            new_enemy.y = random.randint(0, 500)
-            self.game.add_element(new_enemy)
-        else:
-            new_enemy = DemoEnemy(self.__game, 20, "yellow")
-            new_enemy.x = 200
-            new_enemy.y = 200
-            self.game.add_element(new_enemy)
+        randomwalk_enemy = RandomWalkEnemy(self.__game, 50, "pink")
+        randomwalk_enemy.x = random.randint(0, 800)
+        randomwalk_enemy.y = random.randint(0, 500)
+        self.game.add_element(randomwalk_enemy)
+
+        chasing_enemy = ChasingEnemy(self.__game, 30, "blue")
+        chasing_enemy.x = random.randint(0, 800)
+        chasing_enemy.y = random.randint(0, 500)
+        self.game.add_element(chasing_enemy)
+
+        # random_enemy = random.randint(1, 2)
+        # if random_enemy == 1:
+        #     new_enemy = RandomWalkEnemy(self.__game, 50, "pink")
+        #     new_enemy.x = random.randint(0, 800)
+        #     new_enemy.y = random.randint(0, 500)
+        #     self.game.add_element(new_enemy)
+        # else:
+        #     new_enemy = DemoEnemy(self.__game, 20, "red")
+        #     new_enemy.x = 200
+        #     new_enemy.y = 200
+        #     self.game.add_element(new_enemy)
 
         # Call the method again for continuous enemy generation
         self.__game.after(1000, self.create_enemy)
