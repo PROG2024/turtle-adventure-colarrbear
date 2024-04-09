@@ -231,7 +231,7 @@ class Enemy(TurtleGameElement):
         """
         return self.__color
 
-    def hits_player(self):
+    def hits_player(self):  # return bool
         """
         Check whether the enemy is hitting the player
         """
@@ -273,7 +273,9 @@ class DemoEnemy(Enemy):
         self.canvas.coords(self.__id, self.x - self.size / 2, self.y - self.size / 2, self.x + self.size / 2, self.y + self.size / 2)
 
     def delete(self) -> None:
+        # self.canvas.delete(self.__id)
         pass
+
 
 
 # TODO
