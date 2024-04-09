@@ -4,6 +4,7 @@ adventure game.
 """
 from turtle import RawTurtle
 from gamelib import Game, GameElement
+import random, math
 
 
 class TurtleGameElement(GameElement):
@@ -277,6 +278,35 @@ class DemoEnemy(Enemy):
         pass
 
 
+class RandomWalkEnemy(Enemy):
+    """
+    Random walk enemy
+    """
+
+    def __init__(self,
+                 game: "TurtleAdventureGame",
+                 size: int,
+                 color: str):
+        super().__init__(game, size, color)
+        self.__id = None
+        self.direction = random.randint(0, 360)  # Initial random direction
+
+    def create(self) -> None:
+        self.__id = self.canvas.create_oval(0, 0, 0, 0, fill="pink")
+
+    def update(self) -> None:
+        self.direction += random.randint(-15, 15)  # random direction change
+        self.x += math.cos(math.radians(self.direction))
+        self.y += math.sin(math.radians(self.direction))
+        if self.hits_player():
+            self.game.game_over_lose()
+
+    def render(self) -> None:
+        self.canvas.coords(self.__id, self.x - self.size / 2, self.y - self.size / 2, self.x + self.size / 2, self.y + self.size / 2)
+
+    def delete(self) -> None:
+        self.canvas.delete(self.__id)
+
 
 # TODO
 # Complete the EnemyGenerator class by inserting code to generate enemies
@@ -317,10 +347,25 @@ class EnemyGenerator:
         """
         Create a new enemy, possibly based on the game level
         """
-        new_enemy = DemoEnemy(self.__game, 20, "red")
-        new_enemy.x = 100
-        new_enemy.y = 100
-        self.game.add_element(new_enemy)
+        # new_enemy = DemoEnemy(self.__game, 20, "red")
+        # new_enemy.x = 100
+        # new_enemy.y = 100
+        # self.game.add_element(new_enemy)
+
+        random_enemy = random.randint(1, 2)
+        if random_enemy == 1:
+            new_enemy = RandomWalkEnemy(self.__game, 50, "pink")
+            new_enemy.x = random.randint(0, 800)
+            new_enemy.y = random.randint(0, 500)
+            self.game.add_element(new_enemy)
+        else:
+            new_enemy = DemoEnemy(self.__game, 20, "yellow")
+            new_enemy.x = 200
+            new_enemy.y = 200
+            self.game.add_element(new_enemy)
+
+        # Call the method again for continuous enemy generation
+        self.__game.after(1000, self.create_enemy)
 
 
 class TurtleAdventureGame(Game): # pylint: disable=too-many-ancestors
