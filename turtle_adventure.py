@@ -426,17 +426,17 @@ class FencingEnemy(Enemy):
         self.y += dy * self.speed
 
         if self.x >= self.__home_x + self.__offset and dx == 1:  # right border
-            self.__current_direction_index = (
-                                                         self.__current_direction_index + 1) % 4
+            self.__current_direction_index \
+                = (self.__current_direction_index + 1) % 4
         elif self.x <= self.__home_x - self.__offset and dx == -1:  # left border
-            self.__current_direction_index = (
-                                                         self.__current_direction_index + 1) % 4
+            self.__current_direction_index \
+                = (self.__current_direction_index + 1) % 4
         elif self.y >= self.__home_y + self.__offset and dy == 1:  # bottom border
-            self.__current_direction_index = (
-                                                         self.__current_direction_index + 1) % 4
+            self.__current_direction_index \
+                = (self.__current_direction_index + 1) % 4
         elif self.y <= self.__home_y - self.__offset and dy == -1:  # top border
-            self.__current_direction_index = (
-                                                         self.__current_direction_index + 1) % 4
+            self.__current_direction_index \
+                = (self.__current_direction_index + 1) % 4
 
         if self.hits_player():
             self.game.game_over_lose()
@@ -499,7 +499,6 @@ class SinEnemy(Enemy):
         self.canvas.delete(self.__id)
 
 
-# TODO
 # Complete the EnemyGenerator class by inserting code to generate enemies
 # based on the given game level; call TurtleAdventureGame's add_enemy() method
 # to add enemies to the game at certain points in time.
