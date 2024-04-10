@@ -260,6 +260,7 @@ class DemoEnemy(Enemy):
                  color: str):
         super().__init__(game, size, color)
         self.__id = None
+        self.direction = 1  # Initial direction
 
     def create(self) -> None:
         self.__id = self.canvas.create_oval(0, 0, 0, 0, fill="red")
@@ -267,6 +268,12 @@ class DemoEnemy(Enemy):
     def update(self) -> None:
         self.x += 1  # walk straight
         self.y += 1
+
+        if self.x >= self.game.screen_width or self.x <= 0:
+            self.direction *= -1
+        if self.y >= self.game.screen_height or self.y <= 0:
+            self.direction *= -1
+
         if self.hits_player():
             self.game.game_over_lose()
 
@@ -289,15 +296,37 @@ class RandomWalkEnemy(Enemy):
                  color: str):
         super().__init__(game, size, color)
         self.__id = None
-        self.direction = random.randint(0, 360)  # Initial random direction
+        self.speed = 3
+        self.direction = random.randint(0, 360)
 
     def create(self) -> None:
-        self.__id = self.canvas.create_oval(0, 0, 0, 0, fill="pink")
+        self.__id = self.canvas.create_rectangle(0, 0, 0, 0, fill="pink")
 
     def update(self) -> None:
-        self.direction += random.randint(-15, 15)  # random direction change
-        self.x += math.cos(math.radians(self.direction))
-        self.y += math.sin(math.radians(self.direction))
+        self.x += self.speed * math.cos(math.radians(self.direction))
+        self.y += self.speed * math.sin(math.radians(self.direction))
+
+        # horizontal frame
+        if self.x + self.size / 2 >= self.game.screen_width or self.x - self.size / 2 <= 0:
+            self.direction = 180 - self.direction
+            # flip direction if hits
+
+            # adjust position to prevent going out of bounds
+            if self.x + self.size / 2 >= self.game.screen_width:
+                self.x = self.game.screen_width - self.size / 2
+            elif self.x - self.size / 2 <= 0:
+                self.x = self.size / 2
+
+        # vertical frame
+        if self.y + self.size / 2 >= self.game.screen_height or self.y - self.size / 2 <= 0:
+            self.direction = -self.direction
+
+            # adjust the position to prevent going out of bounds
+            if self.y + self.size / 2 >= self.game.screen_height:
+                self.y = self.game.screen_height - self.size / 2
+            elif self.y - self.size / 2 <= 0:
+                self.y = self.size / 2
+
         if self.hits_player():
             self.game.game_over_lose()
 
@@ -317,13 +346,13 @@ class ChasingEnemy(Enemy):
                  game: "TurtleAdventureGame",
                  size: int,
                  color: str,
-                 speed: float = 1):
+                 speed: float = 2):
         super().__init__(game, size, color)
         self.__id = None
         self.speed = speed  # Enemy's speed is 1
 
     def create(self) -> None:
-        self.__id = self.canvas.create_oval(0, 0, 0, 0, fill="blue")
+        self.__id = self.canvas.create_oval(0, 0, 0, 0, fill="skyblue")
 
     def update(self) -> None:
         player_x, player_y = self.game.player.x, self.game.player.y
@@ -338,6 +367,50 @@ class ChasingEnemy(Enemy):
 
     def delete(self) -> None:
         self.canvas.delete(self.__id)
+
+
+class FencingEnemy(Enemy):
+    """
+    *walk around the home in a square-like pattern* enemy
+    """
+
+    def __init__(self,
+                 game: "TurtleAdventureGame",
+                 size: int,
+                 color: str):
+        super().__init__(game, size, color)
+        self.__id = None
+        self.__speed = 2.2
+        self.direction = random.choice([(1, 0), (0, 1), (-1, 0), (0, -1)])  # right, down, left, up
+
+    def create(self) -> None:
+        self.__id = self.canvas.create_polygon(0, 0, 0, 0, fill="green")
+        # self.__id = self.canvas.create_oval(0, 0, self.size / 2, self.size / 2, fill="green")
+
+    def update(self) -> None:
+        self.x += self.__speed * self.direction[0]
+        self.y += self.__speed * self.direction[1]
+
+        if self.x < self.game.home.x - self.game.home.size / 2:
+            self.direction = (1, 0)
+        elif self.x > self.game.home.x + self.game.home.size / 2:
+            self.direction = (-1, 0)
+        elif self.y < self.game.home.y - self.game.home.size / 2:
+            self.direction = (0, 1)
+        elif self.y > self.game.home.y + self.game.home.size / 2:
+            self.direction = (0, -1)
+
+        if self.hits_player():
+            self.game.game_over_lose()
+
+    def render(self) -> None:
+        self.canvas.coords(self.__id, self.x - self.size / 2, self.y - self.size / 2, self.x + self.size / 2, self.y + self.size / 2)
+
+    def delete(self) -> None:
+        # self.canvas.delete(self.__id)
+        pass
+
+
 
 
 # TODO
@@ -384,15 +457,22 @@ class EnemyGenerator:
         new_enemy.y = 100
         self.game.add_element(new_enemy)
 
-        randomwalk_enemy = RandomWalkEnemy(self.__game, 50, "pink")
+        randomwalk_enemy = RandomWalkEnemy(self.__game, 15, "pink")
         randomwalk_enemy.x = random.randint(0, 800)
         randomwalk_enemy.y = random.randint(0, 500)
         self.game.add_element(randomwalk_enemy)
 
-        chasing_enemy = ChasingEnemy(self.__game, 30, "blue")
-        chasing_enemy.x = random.randint(0, 800)
-        chasing_enemy.y = random.randint(0, 500)
-        self.game.add_element(chasing_enemy)
+        # chasing_enemy = ChasingEnemy(self.__game, 30, "blue")
+        # chasing_enemy.x = random.randint(0, 800)
+        # chasing_enemy.y = random.randint(0, 500)
+        # self.game.add_element(chasing_enemy)
+
+        # fencing_enemy = FencingEnemy(self.__game, 40, "green")
+        # fencing_enemy.x = random.randint(50, self.__game.screen_width - 50)
+        # fencing_enemy.y = random.randint(50, self.__game.screen_height - 50)
+        # self.game.add_element(fencing_enemy)
+
+
 
         # random_enemy = random.randint(1, 2)
         # if random_enemy == 1:
