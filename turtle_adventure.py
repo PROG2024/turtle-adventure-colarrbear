@@ -3,8 +3,9 @@ The turtle_adventure module maintains all classes related to the Turtle's
 adventure game.
 """
 from turtle import RawTurtle
+import random
+import math
 from gamelib import Game, GameElement
-import random, math
 
 
 class TurtleGameElement(GameElement):
@@ -249,7 +250,6 @@ class Enemy(TurtleGameElement):
         )
 
 
-# TODO
 # * Define your enemy classes
 # * Implement all methods required by the GameElement abstract class
 # * Define enemy's update logic in the update() method
@@ -416,6 +416,7 @@ class FencingEnemy(Enemy):
         self.x = self.__home_x - self.__offset
         self.y = self.__home_y - self.__offset
         self.speed = speed
+        self.__id = None
 
     def create(self) -> None:
         self.__id = self.canvas.create_oval(0, 0, 0, 0, fill=self.color)
@@ -462,7 +463,6 @@ class SinEnemy(Enemy):
         self.__amplitude = 50
         self.__frequency = 0.02
         self.__speed = speed
-        self.__angle = 0
         self.__id = None
 
         self.x = 0
