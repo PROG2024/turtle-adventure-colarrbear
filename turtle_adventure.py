@@ -359,6 +359,18 @@ class ChasingEnemy(Enemy):
         direction = math.atan2(player_y - self.y, player_x - self.x)
         self.x += math.cos(direction) * self.speed
         self.y += math.sin(direction) * self.speed
+
+        # Check if the enemy is going out of the screen boundaries
+        if self.x - self.size / 2 < 0:
+            self.x = self.size / 2  # Adjust position to prevent going out of bounds
+        elif self.x + self.size / 2 > self.game.screen_width:
+            self.x = self.game.screen_width - self.size / 2  # Adjust position to prevent going out of bounds
+        if self.y - self.size / 2 < 0:
+            self.y = self.size / 2  # Adjust position to prevent going out of bounds
+        elif self.y + self.size / 2 > self.game.screen_height:
+            self.y = self.game.screen_height - self.size / 2  # Adjust position to prevent going out of bounds
+
+
         if self.hits_player():
             self.game.game_over_lose()
 
